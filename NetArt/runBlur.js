@@ -1,23 +1,90 @@
-// get current date
-var curDate = new Date();
 
 var testData = {
     "results": {
-        "sunrise":"7:27:02 AM",
-        "sunset":"5:05:55 PM",
-        "solar_noon":"12:16:28 PM",
-        "day_length":"9:38:53",
-        "civil_twilight_begin":"6:58:14 AM",
-        "civil_twilight_end":"5:34:43 PM",
-        "nautical_twilight_begin":"6:25:47 AM",
-        "nautical_twilight_end":"6:07:10 PM",
-        "astronomical_twilight_begin":"5:54:14 AM",
-        "astronomical_twilight_end":"6:38:43 PM"
+        "sunrise": "2017-02-01T12:04:55+00:00",
+		"sunset": "2017-02-01T22:14:30+00:00",
     },
     "status":"OK"
 }
 
-var dayArray = testData.results.day_length.split(":");  
+var sunrise = new Date(testData.results.sunrise);
+console.log("sunrise: " + sunrise);
+var sunset = new Date(testData.results.sunset);
+console.log("sunset: " + sunset);
+
+var daylength = sunset - sunrise;
+console.log("daylength: " + daylength);
+
+var t = setInterval(updateBlur,1000);
+
+function updateBlur() {
+
+	// get current date
+	var curDate = new Date();
+	curDate.setMonth(1);
+	curDate.setDate(1);
+
+	var curDiffAfterSunrise = curDate - sunrise;
+	convertTimeDifference(curDiffAfterSunrise);
+	
+	Number.prototype.map = function (in_min, in_max, out_min, out_max) {
+	  return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	}
+
+	// gets blurrier further away from sunrise
+	var blurVal = curDiffAfterSunrise.map(0, daylength, 1, 20);
+
+	//var blurVal = map(curDiffAfterSunrise, 0, daylength, 10, 1);
+	console.log(Math.round(blurVal*1000)/1000);
+
+	var value = "0 0 " + blurVal + "px rgba(255,255,255,0.5)";
+	$(".word").css("text-shadow", value);
+
+}
+
+
+
+function convertTimeDifference(diff) {
+	var msec = diff;
+	var hh = Math.floor(msec / 1000 / 60 / 60);
+	msec -= hh * 1000 * 60 * 60;
+	var mm = Math.floor(msec / 1000 / 60);
+	msec -= mm * 1000 * 60;
+	var ss = Math.floor(msec / 1000);
+	msec -= ss * 1000;
+
+	console.log("time past sunrise: " + hh + "h " + mm + "m " + ss + "s");
+	// return array?
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*var sunriseArray = testData.results.sunrise.split(":");
+var tempSec = sunriseArray[2].split(" ");
+sunriseArray[2] = tempSec[0];
+
+
+var sunRise = new Date();
+sunRise.setHours(sunriseArray[0]);
+sunRise.setMinutes(sunriseArray[1]);
+sunRise.setSeconds(sunriseArray[2]);
+
+var test = curTime - testData.results.sunrise;
+console.log(curTime);*/
+
+
+
+/*var dayArray = testData.results.day_length.split(":");  
 
 console.log(dayArray);
 
@@ -26,8 +93,24 @@ var dayMin = parseInt(dayArray[1]);
 var daySec = parseInt(dayArray[2]);
 
 var dayTotal = dayHours*60*60 + dayMin*60 + daySec;
-
 console.log(dayTotal);
+
+
+
+
+console.log(sunriseArray);
+
+var hoursDiff = curHours - sunriseArray[0];
+
+console.log(timePos);
+
+if (hoursDiff > 0) {
+	// current time is after sunrise
+} else if (hoursDiff == 0) {
+
+}*/
+// cur time after sunrise?
+
 
 // get sunrise today
 // get sunset today
@@ -54,19 +137,3 @@ console.log(dayTotal);
 // getting clearer
 // map(current time, 0, SSRS, 1, 10);
 
-var blurVal = 10;
-
-var t = setInterval(updateBlur,1000);
-
-function updateBlur() {
-	var value = "0 0 " + blurVal + "px rgba(255,255,255,0.5)";
-	$(".word").css("text-shadow", value);
-
-	if (blurVal != 0) {
-		blurVal = blurVal - 0.5;
-	} else {
-		clearInterval(t);
-		console.log("ended unblur");
-	}
-	
-}
